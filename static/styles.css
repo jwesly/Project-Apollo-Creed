@@ -1,8 +1,8 @@
-.container h2{
+.container2 h2{
 	font-size:5vh;
 	display:block;
 }
-.container .progress{
+.container2 .progress{
 	height:7vh;
 }
 .reset{
@@ -11,3 +11,4 @@
 	display:block;
 	margin:auto;
 }
+

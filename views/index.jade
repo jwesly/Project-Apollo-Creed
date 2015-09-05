@@ -1,22 +1,44 @@
 html
 	head
-		title Sparring Partner
+		title Rocky VII
 
 		link(rel='stylesheet',href='/styles.css')
 		link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css", rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous")
 		link(rel='stylesheet',href='http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css')
 	body
-		.container
+		select
+			option(value="2") 2 Player Game
+			option(value="1") 1 Player Game
+		.container1
+			h1 Time Left:
+			h2 Score: 
+		.container2
 			h2 Player 1 Health
 			.progress
 				.progress-bar.progress-bar-striped.progress-bar-success.play1(role="progressbar" style="width: 100%")
 			h2 Player 2 Health
 			.progress
 				.progress-bar.progress-bar-striped.progress-bar-success.play2(role="progressbar" style="width: 100%")
-		button.reset  Reset the Score
+			button.reset  Reset the Score
 		script(src='https://code.jquery.com/jquery-2.1.4.min.js')
 		script(src='http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js')
 		script(type='text/javascript').
+			var choice = function(x){
+			console.log(x);
+				if(x==2){
+					$(".container1").hide();
+					$(".container2").show();
+				}
+				if(x==1){
+					$(".container2").hide();
+					$(".container1").show();
+				}
+			}
+			$("select").change(function(){
+				var x = this.value;
+				choice(x);
+				});
+			$("select").trigger("change");
 			var rhost = "/reset";
 			toastr.options = {
 				"closeButton": false,
@@ -51,25 +73,23 @@ html
 			}
 			var updateHealth = function(){
 				$.getJSON(host,function(data){
-					if(!gover){
 						if(data.health1<0){
 							gover = true;
 							toastr.info("Player 2 Won!!!");
-							alert("Player 2 Won!!!");
+							//alert("Player 2 Won!!!");
 						}
 						if(data.health2<0){
 							gover = true;
 							toastr.info("Player 1 Won!!!");
-							alert("Player 1 Won!!!");
+							//alert("Player 1 Won!!!");
 						}
-					}
 					var h1 = String(data.health1/10)+"%";
 					//console.log(h1);
 					var h2 = String(data.health2/10)+"%";
 					$(".play1").css("width",h1);
 					$(".play2").css("width",h2);
 					if(!(bool(data.sync1r)&&bool(data.sync1l)&&bool(data.sync2l)&&bool(data.sync2r)))
-						toastr.warning("A Myo is Unsynced");
+						toastr.warning("A Myo is not ready");
 					});
 			}
-			setInterval(updateHealth,0);
+			setInterval(updateHealth,50);
