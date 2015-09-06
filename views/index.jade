@@ -6,12 +6,21 @@ html
 		link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css", rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous")
 		link(rel='stylesheet',href='http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css')
 	body
-		select
-			option(value="2") 2 Player Game
-			option(value="1") 1 Player Game
 		.container1
-			h1 Time Left:
-			h2 Score: 
+			table
+				tr
+					td Weight(lb)
+					td.weightIn
+						input.weightIn(type="text",value="100")
+				tr
+					td Time Left:
+					td.tleft
+				tr
+					td Score:
+					td.score
+				tr
+					td Calories Burned: 
+					td.cal
 		.container2
 			.header
 				h2 Player 1 health	
@@ -24,27 +33,25 @@ html
 			.progress
 				.progress-bar.progress-bar-striped.progress-bar-success.play2(role="progressbar" style="width: 100%")
 		.buttons
+			button.switch Switch
 			button.start Start
 			button.reset Reset
 		script(src='https://code.jquery.com/jquery-2.1.4.min.js')
 		script(src='http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js')
 		script(type='text/javascript').
-			var choice = function(x){
-			console.log(x);
-				if(x==2){
-					$(".container1").hide();
-					$(".container2").show();
-				}
-				if(x==1){
-					$(".container2").hide();
-					$(".container1").show();
-				}
+
+			var toggleG = function(){
+				$(".container1").toggle();
+				$(".container2").toggle();
+				if(game==1)
+					game=2;
+				else
+					game=1;
 			}
-			$("select").change(function(){
-				var x = this.value;
-				choice(x);
-				});
-			$("select").trigger("change");
+			var game = 1;
+			$(".container2").toggle();
+			$(".switch").click(toggleG);
+
 
 
 			$(".p1").click(function(){
@@ -61,7 +68,7 @@ html
 				});
 			$(".start").click(function(){
 				var x = {};
-				x.game = $("select").val();
+				x.game = game;
 				$.post("/start",x);
 				})
 
@@ -97,16 +104,21 @@ html
 				return false;
 			}
 			var update = function(){
-				if($("select").val()=="2")
+				if(game==2)
 					updateHealth();
 				else
 					updateScore();
 			}
 			var updateScore = function(){
 				$.getJSON("/sstatus",function(data){
-					$(".container1 h1").html("Time Left: "+data.time);
-					console.log(data.score);
-					$(".container1 h2").html("Score: "+data.score);
+					$(".tleft").html(data.time);
+					$(".score").html(data.score);
+					var mass = Number($("input.weightIn").val())*.454;//kg
+					var ke = Math.pow(Number(data.score),2)*.5*mass;//joules
+					var cals = ke*.239005736*.001;
+					var mass_in_swing = 1;
+					var efFactor = 7.68*Math.pow(10,-6);
+					$(".cal").html(cals*mass_in_swing*efFactor);
 					})
 				if(!(bool(data.sync1r)&&bool(data.sync1l)))
 					toastr.warning("Player 1 is not ready");
@@ -129,7 +141,8 @@ html
 					$(".play1").css("width",h1);
 					$(".play2").css("width",h2);
 					if(!(bool(data.sync1r)&&bool(data.sync1l)&&bool(data.sync2l)&&bool(data.sync2r)))
-						toastr.warning("A Myo is not ready");
+						//toastr.warning("A Myo is not ready");
+						;
 					});
 			}
 			setInterval(update,50);

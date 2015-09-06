@@ -19,12 +19,23 @@
 }
 
 .buttons{
-	width:30%;
+	width:50%;
 	margin:auto;
 }
 .buttons button{
-	width:40%;
+	width:28%;
 	margin:5px;
+}
+table{
+	width:50%;
+	font-weight:bold;
+	font-size:1.5em;
+	margin-left:auto;
+	margin-right:auto;
+	margin-bottom:1em;
+}
+table tr{
+	padding .5em;
 }
 
 

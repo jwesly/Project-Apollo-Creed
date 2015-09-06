@@ -24,7 +24,7 @@ app.post('/',function(req,res){
 	{
 		var p = req.body.name.split(".")[0];
 		if(p=="1"&&countdown>0){
-			console.log(countdown,sscore);
+			//console.log(countdown,sscore);
 			sscore = sscore + Number(req.body.punch);
 		}
 	}
