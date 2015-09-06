@@ -129,7 +129,7 @@ html
 					$(".play1").css("width",h1);
 					$(".play2").css("width",h2);
 					if(!(bool(data.sync1r)&&bool(data.sync1l)&&bool(data.sync2l)&&bool(data.sync2r)))
-						;//toastr.warning("A Myo is not ready");
+						toastr.warning("A Myo is not ready");
 					});
 			}
 			setInterval(update,50);
