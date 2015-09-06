@@ -117,7 +117,7 @@ html
 					var ke = Math.pow(Number(data.score),2)*.5*mass;//joules
 					var cals = ke*.239005736*.001;
 					var mass_in_swing = 1;
-					var efFactor = 7.68*Math.pow(10,-6);
+					var efFactor = 7.68*Math.pow(10,-5);
 					$(".cal").html(cals*mass_in_swing*efFactor);
 					})
 				if(!(bool(data.sync1r)&&bool(data.sync1l)))
