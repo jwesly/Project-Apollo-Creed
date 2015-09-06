@@ -10,9 +10,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 app.use(bodyParser.raw());
 app.use(bodyParser.text());
 
-var p1weight = 130;
-var p2weight = 130;
-var ismulti = true;
+
 
 console.log("server starting");
 app.post('/',function(req,res){
@@ -70,7 +68,7 @@ var blockNum = 0;
 app.post('/punch',function(req,res){
 	res.send("ow");
 	punchNum++;
-	console.log(req.body.name,req.body.punch,req.body.type);
+	console.log(req.body.type,req.body.punch);
 	punchType = req.body.type;
 	var p = req.body.name.split(".")[0];
 	if(ismulti){
@@ -120,10 +118,6 @@ app.post('/punch',function(req,res){
 });
 
 
-
-
-
-
 var cdown = function(){
 	setTimeout(function(){
 		countdown--;
@@ -141,6 +135,10 @@ app.post('/start',function(req,res){
 	if(req.body.game=="1")
 		cdown();
 });
+
+var p1weight = 130;
+var p2weight = 130;
+var ismulti = true;
 
 var reset = function(){
 	health1 = 1000;
@@ -177,6 +175,8 @@ app.get('/sstatus',function(req,res){
 		+ '","score":"'+String(sscore)
 		+ '","punchNum":"'+String(punchNum)
 		+ '","type":"'+String(punchType)
+		+ '","sync1r":"'+String(syncs[0])
+	+ '","sync1l":"'+String(syncs[1])
 		+ '"}';
 	res.send(response);
 	ismulti = false;
