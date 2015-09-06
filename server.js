@@ -169,7 +169,7 @@ var p = name.split(".")[0];
 		p2right = bool(block);
 		sync2r = bool(sync);
 	}
-	if(punch>0){//&&sync1l&&sync1r&&sync2l&&sync2r){
+	if(punch>0&&sync1l&&sync1r&&sync2l&&sync2r){
 		//console.log(p1left,p1right,p2left,p2right);
 		punch = punch*3;
 		console.log(punch);
