@@ -32,11 +32,11 @@ for(var i = 0; i < 4; i++){
 	issync[i] = false;
 }
 
-Myo.on('arm_synced'){
+Myo.on('arm_synced',function(){
 	var mkey = getKey(this.name);
 	issync[mkey] = true;
 }
-Myo.on('arm_unsynced'){
+Myo.on('arm_unsynced',function(){
 	var mkey = getKey(this.name);
 	issync[mkey] = false;
 }

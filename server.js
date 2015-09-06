@@ -18,7 +18,7 @@ console.log("server starting");
 app.post('/',function(req,res){
 	//console.log("post recieved");
 	res.send("meh");
-	if(ismulti)
+	//if(ismulti)
 		processRequest(req.body.name,req.body.block,req.body.sync);
 });
 
@@ -196,22 +196,7 @@ var bool = function(x){
 
 var processRequest = function(name,block,sync){
 var p = name.split(".")[0];
-	if(gover)
-		return;
-	if(!gstart)
-		return;
-	if(health2<0){
-		console.log("Player 1 Wins!!!");
-		gover = true;
-		gstart = false;
-		return;
-	}
-	if(health1<0){
-		console.log("Player 2 Wins!!!");
-		gover = true;
-		gstart = false;
-		return;
-	}
+	//console.log(bool(sync));
 	var mkey = getKey(name);
 	blocks[mkey] = bool(block);
 	syncs[mkey] = bool(sync);
