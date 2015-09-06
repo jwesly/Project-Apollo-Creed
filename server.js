@@ -10,13 +10,43 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 app.use(bodyParser.raw());
 app.use(bodyParser.text());
 
+var p1weight = 130;
+var p2weight = 130;
+var ismulti = true;
 
 console.log("server starting");
 app.post('/',function(req,res){
 	//console.log("post recieved");
 	res.send("meh");
-	processRequest(req.body.name,req.body.block,req.body.punch, req.body.sync);
+	if(ismulti)
+		processRequest(req.body.name,req.body.block,req.body.punch, req.body.sync);
+	else
+	{
+		var p = req.body.name.split(".")[0];
+		if(p=="1"&&countdown>0){
+			console.log(countdown,sscore);
+			sscore = sscore + Number(req.body.punch);
+		}
+	}
 });
+
+var health1 = 1000;
+var health2 = 1000;
+var gover = false;
+var gstart = false;
+
+var countdown = 60;
+var sscore = 0;
+app.post('/weight',function(req,res){
+	res.send("meeh");
+	console.log(req.body);
+	console.log(req.body.p1weight,req.body.p2weight);
+	if(req.body.p1weight)
+		p1weight = req.body.p1weight;
+	if(req.body.p2weight)
+		p2weight = req.body.p2weight;
+
+})
 app.set('view engine','jade');
 app.use(express.static('static'));
 
@@ -26,13 +56,32 @@ app.get('/',function(req,res){
 
 
 
-var health1 = 1000;
-var health2 = 1000;
-var gover = false;
+
+
+
+var cdown = function(){
+	setTimeout(function(){
+		countdown--;
+		if(countdown<=0){
+			gover = true;
+			return;
+		}
+		cdown();
+		},1000);
+}
+
+app.post('/start',function(req,res){
+	res.send("starting");
+	gstart = true;
+	if(req.body.game=="1")
+		cdown();
+});
 
 var reset = function(){
 	health1 = 1000;
 	health2 = 1000;
+	sscore = 0;
+	countdown = 60;
 	gover = false;
 }
 
@@ -61,7 +110,16 @@ app.get('/status',function(req,res){
 	+ '","sync2l":"'+String(sync2l)
 	 +'"}';
 	res.send(jsn);
+	ismulti = true;
 })
+app.get('/sstatus',function(req,res){
+	var response = '{"time":"'+String(countdown)
+		+ '","score":"'+String(sscore)
+		+ '"}';
+	res.send(response);
+	ismulti = false;
+})
+
 app.listen(80);
 
 
@@ -78,14 +136,18 @@ var processRequest = function(name,block,punch,sync){
 var p = name.split(".")[0];
 	if(gover)
 		return;
+	if(!gstart)
+		return;
 	if(health2<0){
 		console.log("Player 1 Wins!!!");
 		gover = true;
+		gstart = false;
 		return;
 	}
 	if(health1<0){
 		console.log("Player 2 Wins!!!");
 		gover = true;
+		gstart = false;
 		return;
 	}
 	//if(!bool(sync))

@@ -13,13 +13,19 @@ html
 			h1 Time Left:
 			h2 Score: 
 		.container2
-			h2 Player 1 Health
+			.header
+				h2 Player 1 health	
+				img.gear.p1(src='/settings.svg')
 			.progress
 				.progress-bar.progress-bar-striped.progress-bar-success.play1(role="progressbar" style="width: 100%")
-			h2 Player 2 Health
+			.header
+				h2 Player 2 health	
+				img.gear.p2(src='/settings.svg')
 			.progress
 				.progress-bar.progress-bar-striped.progress-bar-success.play2(role="progressbar" style="width: 100%")
-			button.reset  Reset the Score
+		.buttons
+			button.start Start
+			button.reset Reset
 		script(src='https://code.jquery.com/jquery-2.1.4.min.js')
 		script(src='http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js')
 		script(type='text/javascript').
@@ -39,6 +45,26 @@ html
 				choice(x);
 				});
 			$("select").trigger("change");
+
+
+			$(".p1").click(function(){
+				var weight = prompt("What's your weight in pounds?");
+				var x = {};
+				x.p1weight = weight;
+				$.post("/weight",x);//'{"p1weight":"'+weight+'"}'));
+				});
+			$(".p2").click(function(){
+				var weight = prompt("What's your weight in pounds?");
+				var x = {};
+				x.p2weight = weight;
+				$.post("/weight",x);
+				});
+			$(".start").click(function(){
+				var x = {};
+				x.game = $("select").val();
+				$.post("/start",x);
+				})
+
 			var rhost = "/reset";
 			toastr.options = {
 				"closeButton": false,
@@ -65,14 +91,28 @@ html
 				toastr.info("Health Reset");
 				})
 			});
-			var host = "/status";
 			var bool = function(x){
 				if(x=="true")
 					return true;
 				return false;
 			}
+			var update = function(){
+				if($("select").val()=="2")
+					updateHealth();
+				else
+					updateScore();
+			}
+			var updateScore = function(){
+				$.getJSON("/sstatus",function(data){
+					$(".container1 h1").html("Time Left: "+data.time);
+					console.log(data.score);
+					$(".container1 h2").html("Score: "+data.score);
+					})
+				if(!(bool(data.sync1r)&&bool(data.sync1l)))
+					toastr.warning("Player 1 is not ready");
+			}
 			var updateHealth = function(){
-				$.getJSON(host,function(data){
+				$.getJSON("/status",function(data){
 						if(data.health1<0){
 							gover = true;
 							toastr.info("Player 2 Won!!!");
@@ -89,7 +129,7 @@ html
 					$(".play1").css("width",h1);
 					$(".play2").css("width",h2);
 					if(!(bool(data.sync1r)&&bool(data.sync1l)&&bool(data.sync2l)&&bool(data.sync2r)))
-						toastr.warning("A Myo is not ready");
+						;//toastr.warning("A Myo is not ready");
 					});
 			}
-			setInterval(updateHealth,50);
+			setInterval(update,50);

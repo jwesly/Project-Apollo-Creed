@@ -5,10 +5,26 @@
 .container2 .progress{
 	height:7vh;
 }
-.reset{
-	font-size:3vh;
-	width:16%;
+
+.gear{
+	display:inline;
+	height: 50%;
+}
+.header h2{
+	display:inline;
+}
+.header{
 	display:block;
+	height:10vh;
+}
+
+.buttons{
+	width:30%;
 	margin:auto;
 }
+.buttons button{
+	width:40%;
+	margin:5px;
+}
+
 
