@@ -65,6 +65,7 @@ for(var i=0; i < 4; i++){
 
 
 var punchNum = 0;
+var blockNum = 0;
 
 app.post('/punch',function(req,res){
 	res.send("ow");
@@ -74,13 +75,30 @@ app.post('/punch',function(req,res){
 	var p = req.body.name.split(".")[0];
 	if(ismulti){
 	//.log("here");		//multiplayer punch
+	if(gover)
+		return;
+	if(!gstart)
+		return;
+	if(health2<0){
+		console.log("Player 1 Wins!!!");
+		gover = true;
+		gstart = false;
+		return;
+	}
+	if(health1<0){
+		console.log("Player 2 Wins!!!");
+		gover = true;
+		gstart = false;
+		return;
+	}
 		var punch = req.body.punch;
-		if(punch>0){//&&syncs[0]&&syncs[1]&&syncs[2]&&syncs[3]){
+		if(punch>0&&syncs[0]&&syncs[1]&&syncs[2]&&syncs[3]){
 		//console.log(p1left,p1right,p2left,p2right);
 		var name = req.body.name;
 		if(name=="1.right"&&blocks[3]||name=="1.left"&&blocks[2]||name=="2.right"&&blocks[1]||name=="2.left"&&blocks[0]){
 			punch = punch*.2;//reduce punch by 80% if blocked
 			console.log("punch blocked");
+			blockNum++;
 		}
 		
 		if(p==1){
@@ -131,6 +149,7 @@ var reset = function(){
 	countdown = 60;
 	gover = false;
 	punchNum = 0;
+	blockNum = 0;
 }
 
 app.get('/reset',function(req,res){
@@ -147,6 +166,8 @@ app.get('/status',function(req,res){
 	+ '","sync1l":"'+String(syncs[1])
 	+ '","sync2r":"'+String(syncs[2])
 	+ '","sync2l":"'+String(syncs[3])
+	+ '","punchNum":"'+String(punchNum)
+	+ '","blockNum":"'+String(blockNum)
 	 +'"}';
 	res.send(jsn);
 	ismulti = true;

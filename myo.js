@@ -21,11 +21,24 @@ punch[1] = {};
 punch[2] = {};
 punch[3] = {};
 
+var issync = [];
+
+
 var spitch = [];
 
 for(var i = 0; i < 4; i++){
 	punch[i].y = 0;
 	punch[i].z = 0;
+	issync[i] = false;
+}
+
+Myo.on('arm_synced'){
+	var mkey = getKey(this.name);
+	issync[mkey] = true;
+}
+Myo.on('arm_unsynced'){
+	var mkey = getKey(this.name);
+	issync[mkey] = false;
 }
 
 
@@ -81,8 +94,7 @@ Myo.on('imu',function(data){
 
 	//send request
 	
-
-	request.post(host).form({"name":this.name,"block":block,"sync":this.synced});
+	request.post(host).form({"name":this.name,"block":block,"sync":issync[mkey]});
 
 })
 
