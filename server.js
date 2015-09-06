@@ -73,10 +73,11 @@ app.post('/punch',function(req,res){
 	punchType = req.body.type;
 	var p = req.body.name.split(".")[0];
 	if(ismulti){
-		//multiplayer punch
+	//.log("here");		//multiplayer punch
 		var punch = req.body.punch;
-		if(punch>0&&syncs[0]&&syncs[1]&&syncs[2]&&syncs[3]){
+		if(punch>0){//&&syncs[0]&&syncs[1]&&syncs[2]&&syncs[3]){
 		//console.log(p1left,p1right,p2left,p2right);
+		var name = req.body.name;
 		if(name=="1.right"&&blocks[3]||name=="1.left"&&blocks[2]||name=="2.right"&&blocks[1]||name=="2.left"&&blocks[0]){
 			punch = punch*.2;//reduce punch by 80% if blocked
 			console.log("punch blocked");
