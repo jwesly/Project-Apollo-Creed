@@ -18,16 +18,8 @@ console.log("server starting");
 app.post('/',function(req,res){
 	//console.log("post recieved");
 	res.send("meh");
-	if(ismulti)
-		processRequest(req.body.name,req.body.block,req.body.punch, req.body.sync);
-	else
-	{
-		var p = req.body.name.split(".")[0];
-		if(p=="1"&&countdown>0){
-			//console.log(countdown,sscore);
-			sscore = sscore + Number(req.body.punch);
-		}
-	}
+	//if(ismulti)
+		processRequest(req.body.name,req.body.block,req.body.sync);
 });
 
 var health1 = 1000;
@@ -52,6 +44,79 @@ app.use(express.static('static'));
 
 app.get('/',function(req,res){
 	res.render('index');
+});
+var keyz = [];
+keyz[0] = "1.right";
+keyz[1] = "1.left";
+keyz[2] = "2.right";
+keyz[3] = "2.left";
+
+var getKey = function(str){
+	return keyz.indexOf(str);
+}
+
+var blocks = [];
+var syncs = [];
+var punchType = "";
+for(var i=0; i < 4; i++){
+	blocks[i] = false;
+	syncs[i] = false
+}
+
+
+var punchNum = 0;
+var blockNum = 0;
+
+app.post('/punch',function(req,res){
+	res.send("ow");
+	punchNum++;
+	console.log(req.body.name,req.body.punch,req.body.type);
+	punchType = req.body.type;
+	var p = req.body.name.split(".")[0];
+	if(ismulti){
+	//.log("here");		//multiplayer punch
+	if(gover)
+		return;
+	if(!gstart)
+		return;
+	if(health2<0){
+		console.log("Player 1 Wins!!!");
+		gover = true;
+		gstart = false;
+		return;
+	}
+	if(health1<0){
+		console.log("Player 2 Wins!!!");
+		gover = true;
+		gstart = false;
+		return;
+	}
+		var punch = req.body.punch;
+		if(punch>0&&syncs[0]&&syncs[1]&&syncs[2]&&syncs[3]){
+		//console.log(p1left,p1right,p2left,p2right);
+		var name = req.body.name;
+		if(name=="1.right"&&blocks[3]||name=="1.left"&&blocks[2]||name=="2.right"&&blocks[1]||name=="2.left"&&blocks[0]){
+			punch = punch*.2;//reduce punch by 80% if blocked
+			console.log("punch blocked");
+			blockNum++;
+		}
+		
+		if(p==1){
+			health2=health2-punch;
+			console.log("Player 2 Health: ",health2);
+		}
+		if(p==2){
+			health1 = health1-punch;
+			console.log("Player 1 Health: ",health1);
+		}
+	}
+	}
+	else{
+		if(p=="1"&&countdown>0){
+			//console.log(countdown,sscore);
+			sscore = sscore + Number(req.body.punch);
+		}
+	}
 });
 
 
@@ -83,6 +148,8 @@ var reset = function(){
 	sscore = 0;
 	countdown = 60;
 	gover = false;
+	punchNum = 0;
+	blockNum = 0;
 }
 
 app.get('/reset',function(req,res){
@@ -90,24 +157,17 @@ app.get('/reset',function(req,res){
 	reset();
 });
 
-var p1left = false;
-var p1right = false;
-var p2left = false;
-var p2right = false;
-
-var sync1r = false;
-var sync1l = false;
-var sync2r = false;
-var sync2l = false;
 
 app.get('/status',function(req,res){
 	var jsn = '{'
 	+'"health1":"'+ String(health1)
 	+ '","health2":"'+String(health2)
-	+ '","sync1r":"'+String(sync1r)
-	+ '","sync1l":"'+String(sync1l)
-	+ '","sync2r":"'+String(sync2r)
-	+ '","sync2l":"'+String(sync2l)
+	+ '","sync1r":"'+String(syncs[0])
+	+ '","sync1l":"'+String(syncs[1])
+	+ '","sync2r":"'+String(syncs[2])
+	+ '","sync2l":"'+String(syncs[3])
+	+ '","punchNum":"'+String(punchNum)
+	+ '","blockNum":"'+String(blockNum)
 	 +'"}';
 	res.send(jsn);
 	ismulti = true;
@@ -115,6 +175,8 @@ app.get('/status',function(req,res){
 app.get('/sstatus',function(req,res){
 	var response = '{"time":"'+String(countdown)
 		+ '","score":"'+String(sscore)
+		+ '","punchNum":"'+String(punchNum)
+		+ '","type":"'+String(punchType)
 		+ '"}';
 	res.send(response);
 	ismulti = false;
@@ -132,59 +194,10 @@ var bool = function(x){
 
 
 
-var processRequest = function(name,block,punch,sync){
+var processRequest = function(name,block,sync){
 var p = name.split(".")[0];
-	if(gover)
-		return;
-	if(!gstart)
-		return;
-	if(health2<0){
-		console.log("Player 1 Wins!!!");
-		gover = true;
-		gstart = false;
-		return;
-	}
-	if(health1<0){
-		console.log("Player 2 Wins!!!");
-		gover = true;
-		gstart = false;
-		return;
-	}
-	//if(!bool(sync))
-		//console.log("unsynced ",name);
-	if(name=="1.left"){
-		p1left = bool(block);
-		sync1l = bool(sync);
-	}
-	else if(name=="1.right"){
-		p1right = bool(block);
-		sync1r = bool(sync);
-	}
-	else if(name=="2.left"){
-		p2left = bool(block);
-		sync2l = bool(sync);
-		//console.log(name,block,punch);
-	}
-	else if(name=="2.right"){
-		p2right = bool(block);
-		sync2r = bool(sync);
-	}
-	if(punch>0&&sync1l&&sync1r&&sync2l&&sync2r){
-		//console.log(p1left,p1right,p2left,p2right);
-		punch = punch*3;
-		console.log(punch);
-		if(name=="1.right"&&p2left||name=="1.left"&&p2right||name=="2.right"&&p1left||name=="2.left"&&p1right){
-			punch = punch*.2;//reduce punch by 80% if blocked
-			console.log("punch blocked");
-		}
-		
-		if(p==1){
-			health2=health2-punch;
-			console.log("Player 2 Health: ",health2);
-		}
-		if(p==2){
-			health1 = health1-punch;
-			console.log("Player 1 Health: ",health1);
-		}
-	}
+	//console.log(bool(sync));
+	var mkey = getKey(name);
+	blocks[mkey] = bool(block);
+	syncs[mkey] = bool(sync);
 };

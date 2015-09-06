@@ -6,6 +6,8 @@ html
 		link(href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css", rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous")
 		link(rel='stylesheet',href='http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css')
 	body
+		audio#punch(src="/sounds/dhshoom.wav",type="audio/wav")
+		audio#block(src="/sounds/nope.wav",type="audio/wav")
 		.container1
 			table
 				tr
@@ -13,14 +15,17 @@ html
 					td.weightIn
 						input.weightIn(type="text",value="100")
 				tr
-					td Time Left:
+					td Time Left
 					td.tleft
 				tr
-					td Score:
+					td Score
 					td.score
 				tr
-					td Calories Burned: 
+					td Calories Burned 
 					td.cal
+				tr
+					td Punches Thrown
+					td.punchNum
 		.container2
 			.header
 				h2 Player 1 health	
@@ -36,6 +41,7 @@ html
 			button.switch Switch
 			button.start Start
 			button.reset Reset
+		div.punch
 		script(src='https://code.jquery.com/jquery-2.1.4.min.js')
 		script(src='http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js')
 		script(type='text/javascript').
@@ -51,6 +57,7 @@ html
 			var game = 1;
 			$(".container2").toggle();
 			$(".switch").click(toggleG);
+
 
 
 
@@ -109,22 +116,52 @@ html
 				else
 					updateScore();
 			}
+			var mpunchNum = 0;
+			var mbnum = 0;
 			var updateScore = function(){
 				$.getJSON("/sstatus",function(data){
 					$(".tleft").html(data.time);
 					$(".score").html(data.score);
+					var pnum = Number(data.punchNum);
+					if(pnum!=mpunchNum){
+						//play punch noise
+						if(pnum>mpunchNum)
+							document.getElementById("punch").play();
+
+						mpunchNum = pnum;
+					}
+					$(".punchNum").html(data.punchNum);
+					$(".punch").html(data.type);
 					var mass = Number($("input.weightIn").val())*.454;//kg
 					var ke = Math.pow(Number(data.score),2)*.5*mass;//joules
 					var cals = ke*.239005736*.001;
 					var mass_in_swing = 1;
-					var efFactor = 7.68*Math.pow(10,-6);
+					var efFactor = 7.68*Math.pow(10,-5);
 					$(".cal").html(cals*mass_in_swing*efFactor);
-					})
-				if(!(bool(data.sync1r)&&bool(data.sync1l)))
-					toastr.warning("Player 1 is not ready");
+					if(!(bool(data.sync1r)&&bool(data.sync1l)))
+						toastr.warning("Player 1 is not ready");
+					});
+				
 			}
 			var updateHealth = function(){
 				$.getJSON("/status",function(data){
+					
+					var pnum = Number(data.punchNum);
+					var bnum = Number(data.blockNum)
+					if(pnum!=mpunchNum){
+						
+						if(bnum!=mbnum){
+							if(bnum>mbnum)
+								document.getElementById("block").play();
+							mbnum = bnum;
+						}
+						else{
+							//play punch noise
+							if(pnum>mpunchNum)
+							document.getElementById("punch").play();
+						}
+						mpunchNum = pnum;
+					}
 						if(data.health1<0){
 							gover = true;
 							toastr.info("Player 2 Won!!!");
@@ -141,7 +178,7 @@ html
 					$(".play1").css("width",h1);
 					$(".play2").css("width",h2);
 					if(!(bool(data.sync1r)&&bool(data.sync1l)&&bool(data.sync2l)&&bool(data.sync2r)))
-						//toastr.warning("A Myo is not ready");
+						toastr.warning("A Myo is not ready");
 						;
 					});
 			}
